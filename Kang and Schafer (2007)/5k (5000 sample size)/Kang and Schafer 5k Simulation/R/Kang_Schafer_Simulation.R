@@ -1,4 +1,4 @@
-source('functions (data generation & evaluation & plots).R')
+source('Methods.R')
 seed_file <- read.csv('sim_seed.csv', header = FALSE) ## seeds
 seed_values <- seed_file[,1]
 
