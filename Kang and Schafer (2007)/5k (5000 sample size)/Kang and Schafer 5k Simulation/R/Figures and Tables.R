@@ -4,7 +4,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 
-source('functions (data generation & evaluation & plots).R')
+source('Methods.R')
 
 ########################################################################
 ################ Individual Data Results ###############################
