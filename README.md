@@ -5,7 +5,7 @@ This project guides users how to implemented the PSLB deep learning method to es
   - 5k (5000 sample size) [*]
     - True (correctly specified propensity score model)
     - Mis (mis-specified propensity score model)
-  - 5w (50000 sample size)
+  - 1k (1000 sample size)
     - True (correctly specified propensity score model)
     - Mis (mis-specified propensity score model)
 - Hainmueller (2012)
