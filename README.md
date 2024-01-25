@@ -11,7 +11,7 @@ This project guides users how to implemented the PSLB deep learning method to es
 - Hainmueller (2012)
   - Sd1 (correctly specified propensity score model)
   - Sd3 (mis-specified propensity score model)
-- SSMR [*]
+- SSMR 
   - True (correctly specified propensity score model)
   - Mis (mis-specified propensity score model)
 - EQLS (real data) [*]
