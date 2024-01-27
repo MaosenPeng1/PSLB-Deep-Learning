@@ -1,6 +1,6 @@
 # Prpensity Score Local Balance (PSLB) Estimation Using Deep Learning
 ## Description
-This project guides users how to implemented the PSLB deep learning method to estimate propensity scores introduced in 'A Deep Learning Approach to Nonparametric Propensity Score Estimation with Optimized Covariate Balance'. It consists of total 10 simulation settings and a real data analysis. All related files for each setting are contained in the zip file listed below,
+This project guides users how to implemented the PSLB deep learning method to estimate propensity scores introduced in 'A Deep Learning Approach to Nonparametric Propensity Score Estimation with Optimized Covariate Balance'. It consists of total 6 simulation settings and a real data analysis. All related files for each setting are contained in the zip file listed below,
 - Kang and Schafer (2007) 
   - 5k (5000 sample size) [*]
     - True (correctly specified propensity score model)
@@ -8,9 +8,6 @@ This project guides users how to implemented the PSLB deep learning method to es
   - 1k (1000 sample size)
     - True (correctly specified propensity score model)
     - Mis (mis-specified propensity score model)
-- Hainmueller (2012)
-  - Sd1 (correctly specified propensity score model)
-  - Sd3 (mis-specified propensity score model)
 - SSMR 
   - True (correctly specified propensity score model)
   - Mis (mis-specified propensity score model)
