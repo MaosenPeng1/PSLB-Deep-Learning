@@ -27,7 +27,7 @@ Editor: RStudio
 Packages Required:
 CBPS, dplyr, tidyr, ggplot2, knitr, kableExtra.
 
-* Python: version -- 3.9.7
+* Python: version -- 3.11.3
 Editor: Visual Studio Code
 Packages Required:
 torch, numpy, pandas, sys, argparse.
@@ -47,7 +47,7 @@ The real data here is the European Quality of Life Survey (EQLS) study data, whi
 3. evaluate the global balance, local balance, and outcome estimation (mean outcome or average treatment effect) with "Figures and Tables.R". This code can output figures and tables presneted in the article. 
 
 ## LICENSE
-
+This project is licensed under the MIT License - see the LICENSE.txt file for details.
 
 
 
