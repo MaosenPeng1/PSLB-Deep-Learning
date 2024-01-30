@@ -5,13 +5,16 @@ This project guides users how to implemented the PSLB deep learning method to es
   - 5k (5000 sample size) [*]
     - True (correctly specified propensity score model)
     - Mis (mis-specified propensity score model)
+    - Sensitivity Analysis (Network Layers)
   - 1k (1000 sample size)
     - True (correctly specified propensity score model)
     - Mis (mis-specified propensity score model)
 - SSMR 
   - True (correctly specified propensity score model)
   - Mis (mis-specified propensity score model)
-- EQLS (real data) [*]
+- EQLS (real data) 
+  - Data Application [*]
+  - Bootstrap (standard deviation)
 
 *: The results of the file are shown in the main context of the article. 
 
