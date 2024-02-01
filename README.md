@@ -41,7 +41,7 @@ Purpose: run deep learning code parallel on sever. The bash file (.lsf) is gener
 The simulated data is generated using the "*Simulation.R" file for all seeds in 'sim_seed.csv'. 
 
 The real data here is the European Quality of Life Survey (EQLS) study data, which is available from the UK Data Service https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=7724\#!/access-data. The 'Get_Data_EQLS.R' presents the data cleaning details and descriptive analysis of the data. 
-Here we also uploaded the cleaned data in file 'eqls_data.csv' as long as the file illustrating how we clean the data 'Get_Data_EQLS.R'. The EQLS is a survey conducted through questionnaires that encompasses adults from 35 European countries. We merged the data from the 2007 and 2011 iterations of the EQLS. Our focus is on determining whether conflicts between work and life balance, as self-reported by respondents, influence the mental well-being of the working adult population. The 2007 EQLS included 35,635 individuals, while the 2011 version had 43,636 participants. For ease of analysis, we omitted 21,800 participants from the 2007 dataset and 27,234 from the 2011 dataset due to incomplete information. Our final sample is comprised of 17,439 individuals experiencing conflicts in balancing work and life (either at work, at home, or both, referred to as cases) and 12,797 individuals with no or minor conflicts (referred to as controls). We assessed mental well-being as the outcome using the World Health Organization Five (WHO-5) well-being index, which ranges from 0 to 100. This index evaluates the respondent's emotional state over the preceding two weeks. The number of covariates is 70.
+Here we also uploaded the cleaned data in file `eqls_data.csv` as long as the file illustrating how we clean the data `Get_Data_EQLS.R`. The EQLS is a survey conducted through questionnaires that encompasses adults from 35 European countries. We merged the data from the 2007 and 2011 iterations of the EQLS. Our focus is on determining whether conflicts between work and life balance, as self-reported by respondents, influence the mental well-being of the working adult population. The 2007 EQLS included 35,635 individuals, while the 2011 version had 43,636 participants. For ease of analysis, we omitted 21,800 participants from the 2007 dataset and 27,234 from the 2011 dataset due to incomplete information. Our final sample is comprised of 17,439 individuals experiencing conflicts in balancing work and life (either at work, at home, or both, referred to as cases) and 12,797 individuals with no or minor conflicts (referred to as controls). We assessed mental well-being as the outcome using the World Health Organization Five (WHO-5) well-being index, which ranges from 0 to 100. This index evaluates the respondent's emotional state over the preceding two weeks. The number of covariates is 70.
 
 ## Instructions
 1. generate data using "*Simulation.R", you will get data and ck_h csv files. The ck_h contains the local points and adaptive bandwidth by default, one can specify or define there own local intervals. Note all R functions are included in the "Method.R" file.
@@ -55,15 +55,52 @@ To facilitate the review process and ensure the reproducibility of our results, 
 - Script: `Kang_Schafer_Simulation.R`
 - Seed File: `sim_seed.csv`
 - Output: 100 simulated datasets and corresponding `ck_h.csv` files.
+- Parameters: Default span $\rho=0.1$ is used to determine the locality and compute the adaptive bandwidth.
+- Execution Environment: High-Performance Computing (HPC) cluster.
+- Command: After loading the R module (`module load R`), execute the simulation script using `Rscript Kang_Schafer_Simulation.R`.
+- Purpose: This step generates simulated data essential for the subsequent analysis.
 
-Simulate data with R script 'Kang_Schafer_Simulation.R' along with the seed file 'sim_seed.csv', which will output 100 simulated data and ck_h csv files. Inside the simulation file, users can specify the span $\rho$ to determine the locality and compute the adaptive bandwidth, here we use the default $\rho=0.1$. This process can be done on HPC cluster with command 'Rscript Kang_Schafer_Simulation.R' after loading the R module - 'module load R'. 
-2. Generate bash files (.lsf) using 'parallel_logistic_cbps_lsf_generation.py': logistic and CBPS method (this will require 40 cores to perform parallel processes); 'BCE_lsf_generation.py': BCE method (require at least 2GB memory, 100 CPUs with 1 cores and extensive 2 hour wall-time); 'PSLB_lsf_generation.py': LBC-Net method (require require at least 2GB memory, 100 CPUs with 1 core and extensive 2 hour wall-time); 'Learning_rate_lsf_generation.py': grid search for learning rate for BCE and LBC-Net method consecutively. Then follow the instructions inside each file to run the program either in python or R on cluster. This will result in multiple csv results files, download all into the local computer. (Here we will need to evaluate the tunning parameter (learning rate) first so that we put the optimal learning rate (plot a simple scatter plot of loss $Q(\theta)$ in R to see the convergence behavior.) into the scripts for each method).  
+2. Bash Files Generation and Execution
+Generate bash files for different analytical methods using the following Python scripts:
+- Logistic and CBPS Method: `parallel_logistic_cbps_lsf_generation.py`
+  - Requirements: 40 cores for parallel processes.
+- LBC-Net Method: `PSLB_lsf_generation.py`
+  - Requirements: At least 2GB memory, 100 CPUs with 1 core, and 2 hours of wall-time; CPUs suffice for execution, although GPU nodes can be utilized if available.
+- BCE Method: `BCE_lsf_generation.py`
+  - Requirements: Similar to LBC-Net method. 
+- Learning Rate Optimization: `Learning_rate_lsf_generation.py`
+  - Purpose: Conduct a grid search for the learning rate for both BCE and LBC-Net methods. Evaluate tuning parameters by plotting a scatter plot of loss $Q(\theta)$ to observe convergence behavior.
 
-In script 'PSLB_lsf_generation.py' of our LBC-Net method, we specify the device argument so that user may use the GPU node if accessible, but here we use CPUs as it is enough for such jobs. Then we load the data and bandwidths with specific seed. Next, we input all the initial parameters including batch size, input, hidden, and output dimensions, learning rate, total epochs. The hidden dimension was chosen from experience between the number of covariates and the total sample size. We created a dataloader that contains process of normalizing the data and creating intercept term. A VAE model is implemented that output the initial weights for our propensity score model. We train the model with VAE weights and output the fitted the propensity score. Our model is a three layer fully connected network with batch normalization and residual connections. Such model find optimal propensity scores that minimize our objective functions. The customized loss functions are 'local_balance_ipw_loss' and 'penalty_loss' (calibration loss in the article). 
+Follow the embedded instructions within each script to run the corresponding programs on the cluster, either in Python or R. After execution, download all resulting CSV files to your local machine for analysis.
 
-3. Evaluate the results using local R with 'Figures and Tables.R'. This file will implemented the functions in 'Methods.R' to reproduce all the figures and tables presented in the article.
+3. Analysis and Evaluation
+- Script for Figures and Tables: `Figures and Tables.R`
+  - This script utilizes functions defined in `Methods.R` to reproduce all figures and tables presented in the article.
+- Purpose: To evaluate the results and verify the reproducibility of our findings.
 
-In addition, we conducted the sensitivity analysis using different network structures (different layers 3 to 6), similar steps are as above. This is inside the file 'Sensitivity Analysis (Network Layers)'.
+### Additional Steps for Sensitivity Analysis
+To assess the robustness of our findings, we conducted a sensitivity analysis focusing on different network structures (ranging from 3 to 6 layers). This analysis is detailed in the `Sensitivity Analysis (Network Layers)` file, and the steps for execution are similar to those outlined above.
+
+### Training Details and Hyperparameter Selection
+Data Preparation:
+- Data Loading: Data and bandwidths were loaded using a specific seed to ensure reproducibility. 
+- Normalization and Data Processing: A custom dataloader was employed to normalize the data and add an intercept term, preparing the data for model training.
+
+Model Configuration:
+- Initial Parameters:
+  - Batch Size: Determined based on dataset size (batch gradient descent).
+  - Input Dimensions: Set according to the number of covariates in the dataset.
+  - Hidden Dimensions: Chosen from experience, balancing between the number of covariates and the total sample size to optimize model complexity and prevent overfitting.
+  - Output Dimensions: Configured to match the requirements of the propensity score estimation.
+  - Learning Rate: Initially selected through preliminary experiments, then fine-tuned using a grid search approach to identify the optimal value that minimizes the loss function.
+  - Total Epochs: Set to ensure sufficient model training ($20000$).
+
+Model Architecture:
+
+
+Then we load the data and bandwidths with specific seed. Next, we input all the initial parameters including batch size, input, hidden, and output dimensions, learning rate, total epochs. The hidden dimension was chosen from experience between the number of covariates and the total sample size. We created a dataloader that contains process of normalizing the data and creating intercept term. A VAE model is implemented that output the initial weights for our propensity score model. We train the model with VAE weights and output the fitted the propensity score. Our model is a three layer fully connected network with batch normalization and residual connections. Such model find optimal propensity scores that minimize our objective functions. The customized loss functions are 'local_balance_ipw_loss' and 'penalty_loss' (calibration loss in the article). 
+
+Please ensure that each step is followed carefully to guarantee the accurate reproduction of our study’s results. Your attention to detail and adherence to these instructions are greatly appreciated and essential for a thorough review process.
 
 ## LICENSE
 This project is licensed under the MIT License - see the LICENSE.txt file for details.
