@@ -63,9 +63,9 @@ To facilitate the review process and ensure the reproducibility of our results, 
 2. Bash Files Generation and Execution
 Generate bash files for different analytical methods using the following Python scripts:
 - Logistic and CBPS Method: `parallel_logistic_cbps_lsf_generation.py`
-  - Requirements: 40 cores for parallel processes.
+  - Requirements: 40 cores for parallel processes and total 200 GB memory.
 - LBC-Net Method: `PSLB_lsf_generation.py`
-  - Requirements: At least 2GB memory, 100 CPUs with 1 core, and 2 hours of wall-time; CPUs suffice for execution, although GPU nodes can be utilized if available.
+  - Requirements: At least 2GB memory, 100 CPUs with 1 core, and 2 hours of wall-time; CPUs suffice for execution, although GPU nodes can be utilized if available (available gpu resources in our study is `cuda10.0/toolkit/10.0.130`).
 - BCE Method: `BCE_lsf_generation.py`
   - Requirements: Similar to LBC-Net method. 
 - Learning Rate Optimization: `Learning_rate_lsf_generation.py`
@@ -102,8 +102,15 @@ Model Architecture:
   - local_balance_ipw_loss: $Q1$ in the article.
   - penalty_loss (referred to as calibration loss in the article): $Q2$ in the article.
 
-
 Please ensure that each step is followed carefully to guarantee the accurate reproduction of our study’s results. Your attention to detail and adherence to these instructions are greatly appreciated and essential for a thorough review process.
+
+## Real Data Analysis
+Computational Resources and Configuration:
+- Wall-Time: Given the complexity and size of the real dataset, we allocated 6 hours of wall-time for all methods.
+- Memory Allocation: 6GB of memory is reserved for CPU nodes
+- GPU Utilization for LBC-Net Method: a GPU node equipped with 16 cores (`cuda10.0/toolkit/10.0.130`). 
+
+The processing steps for the real data analysis mirror those described in the simulation study section. This consistency ensures that the methodologies are applied systematically across different datasets, allowing for direct comparisons of performance and outcomes. Additionally, `Bootstrap (standard deviation)` file contains scripts implementing 100 bootstrap simulations to assess the stability (bootstrap standard deviation) of all methods when applied to real-world data. Each simulation replicates the data analysis process, applying our methods to resampled datasets. 
 
 ## LICENSE
 This project is licensed under the MIT License - see the LICENSE.txt file for details.
