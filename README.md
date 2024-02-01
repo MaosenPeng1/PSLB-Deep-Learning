@@ -96,9 +96,12 @@ Model Configuration:
   - Total Epochs: Set to ensure sufficient model training ($20000$).
 
 Model Architecture:
+- Network Structure: The model is a three-layer fully connected neural network, incorporating batch normalization and residual connections to enhance learning dynamics and stability.
+- VAE for Initial Weights: A Variational Autoencoder (VAE) model was implemented to generate initial weights for the propensity score model, facilitating a more effective learning start point.
+- Customized Loss Functions:
+  - local_balance_ipw_loss: $Q1$ in the article.
+  - penalty_loss (referred to as calibration loss in the article): $Q2$ in the article.
 
-
-Then we load the data and bandwidths with specific seed. Next, we input all the initial parameters including batch size, input, hidden, and output dimensions, learning rate, total epochs. The hidden dimension was chosen from experience between the number of covariates and the total sample size. We created a dataloader that contains process of normalizing the data and creating intercept term. A VAE model is implemented that output the initial weights for our propensity score model. We train the model with VAE weights and output the fitted the propensity score. Our model is a three layer fully connected network with batch normalization and residual connections. Such model find optimal propensity scores that minimize our objective functions. The customized loss functions are 'local_balance_ipw_loss' and 'penalty_loss' (calibration loss in the article). 
 
 Please ensure that each step is followed carefully to guarantee the accurate reproduction of our study’s results. Your attention to detail and adherence to these instructions are greatly appreciated and essential for a thorough review process.
 
