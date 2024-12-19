@@ -1,130 +1,270 @@
-# Prpensity Score Local Balance (PSLB) Estimation Using Deep Learning
+# LBC-Net: A Propensity Score Estimation Method
+
 ## Description
-This project guides users how to implemented the PSLB deep learning method (LBC-Net) to estimate propensity scores introduced in 'A Deep Learning Approach to Nonparametric Propensity Score Estimation with Optimized Covariate Balance'. It consists of total 6 simulation settings and a real data analysis. All related files for each setting are contained in the zip file listed below,
-- Kang and Schafer (2007) 
-  - 5k (5000 sample size) [*]
-    - True (correctly specified propensity score model)
-    - Mis (mis-specified propensity score model)
-    - Sensitivity Analysis (Network Layers)
-  - 1k (1000 sample size)
-    - True (correctly specified propensity score model)
-    - Mis (mis-specified propensity score model)
-- SSMR 
-  - True (correctly specified propensity score model)
-  - Mis (mis-specified propensity score model)
-- EQLS (real data) 
-  - Data Application [*]
-  - Bootstrap (standard deviation)
 
-*: The results of the file are shown in the main context of the article. 
+This project provides a comprehensive guide to implementing LBC-Net for
+estimating propensity scores, as introduced in "A Deep Learning Approach
+to Nonparametric Propensity Score Estimation with Optimized Covariate
+Balance." It includes two main components: a case study detailing data
+preprocessing and model application, and simulation experiments based on
+settings from Kang and Schafer (2007) and Li and Li (2021), showcasing
+the model's performance. The outlines of the files in this project are
+outlined below,
 
-Update: The universal code for LBC-Net propensity score estimation can be found in `Code` file. The following detailed descriptions are useful only if you would like to replicate the results in the paper by yourself.
+-   LBC-Net (Illustration Code)
+-   Complete Project Code
+    -   Case Study (MIMIC-EPR)
+        -   Data Application
+        -   Data Preprocessing
+    -   Simulation
+        -   Kang and Schafer (2007) [KS]
+        -   Li and Li (2021)
+            -   M1
+            -   M2
+            -   M3
 
-Each simulation file consists of two parts, estimation and evaluation. The estimation related to the deep learning are conducted using Python (.py) and others are implemented with R (.R). Besides the PSLB method, the file also includes logistic regression, CBPS, and deep learning method with BCE loss for estimation comparison. The figures and tables in the article are contained in the evaluation files. A seed file is in each simulation files so that the results can be reproductive. The details will illustrated below, along with a step by step guide using Kang and Schafer (2007) of 5000 sample size as an example. 
+The project provides the `LBC-Net (Illustration Code)` for implementing
+the LBC-Net methods, using the MIMIC-EPR case study as an example, along
+with some illustrative results. For a comprehensive replication of the
+entire study presented in the paper, refer to the
+`Complete Project Code`.
+
+Within the `Complete Project Code zip` file, you will find detailed
+scripts for data generation, preprocessing, and the complete application
+study, which includes causal inference, variance estimation, and
+time-varying effects. The `Simulation` file contains two simulation
+settings. The first is based on the benchmark study by Kang and Schafer
+(2007) with sample sizes of 300, 1,000, and 5,000. The second is based
+on Li and Li (2021) and includes three scenarios: M1, which involves
+good overlap, homogeneous causal effects, and 20 covariates; M2, which
+features poor overlap, both homogeneous and heterogeneous causal
+effects, and 20 covariates; and M3, which includes good overlap,
+homogeneous causal effects, 84 covariates, and a sample size of 30,000.
+
+Each file contains a `function.R` script that is used for all R code
+specific to that file.
+
+There is a `function.R` in each file, which are used for all R code
+specific to this file. In each sub-study, in addition to LBC-Net, the
+code also compares performance with model-based methods (Logistic
+Regression, CBPS, NN) and weight-based methods (SBW, CBIPM, EB, OSQP).
+It is worth noting that ATT weight-based methods, such as EB and OSQP,
+are not included in all simulations. Further details on these methods
+can be found in the supplementary materials.
+
+The following sections provide step-by-step guidance for implementing
+the `LBC-Net (Illustration Code)`, along with comprehensive instructions
+for the `KS Simulation with a sample size of 5000` and the
+`Data Application`.
 
 ## Installation and Setup
+
 ### Codes and Resources Used
-* R: version -- 4.3.1
-Editor: RStudio
-Packages Required:
-CBPS, dplyr, tidyr, ggplot2, knitr, kableExtra.
 
-* Python: version -- 3.11.3
-Editor: Visual Studio Code
-Packages Required:
-torch, numpy, pandas, sys, argparse.
+-   R: version -- 4.3.1 Editor: RStudio
 
-* Sever: High Performance Computing (HPC) - Seadragon Cluster (Linux system)
-Editor: X-Win32
-Hardware Resources: Central Processing Unit (CPU) and Graphics Processing Unit (GPU)
-Purpose: run deep learning code parallel on sever. The bash file (.lsf) is generated by the file called '*lsf_generation.py'.
+-   Python: version -- 3.11.3 Editor: Visual Studio Code Required
+    Modules: torch, numpy, pandas, argparse, time.
 
-## Data
-The simulated data is generated using the "*Simulation.R" file for all seeds in 'sim_seed.csv'. 
+-   Sever: High Performance Computing (HPC) - Seadragon Cluster (Linux
+    system) Editor: X-Win32 Hardware Resources: Central Processing Unit
+    (CPU) or Graphics Processing Unit (GPU) Purpose: To run deep
+    learning code in parallel on the server. The bash files (.lsf) are
+    generated using the `lsf_script*.py` file, which is also used to
+    specify model parameters when applicable.
 
-The real data here is the European Quality of Life Survey (EQLS) study data, which is available from the UK Data Service https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=7724\#!/access-data. The 'Get_Data_EQLS.R' presents the data cleaning details and descriptive analysis of the data. 
-Here we also uploaded the cleaned data in file `eqls_data.csv` as long as the file illustrating how we clean the data `Get_Data_EQLS.R`. The EQLS is a survey conducted through questionnaires that encompasses adults from 35 European countries. We merged the data from the 2007 and 2011 iterations of the EQLS. Our focus is on determining whether conflicts between work and life balance, as self-reported by respondents, influence the mental well-being of the working adult population. The 2007 EQLS included 35,635 individuals, while the 2011 version had 43,636 participants. For ease of analysis, we omitted 21,800 participants from the 2007 dataset and 27,234 from the 2011 dataset due to incomplete information. Our final sample is comprised of 17,439 individuals experiencing conflicts in balancing work and life (either at work, at home, or both, referred to as cases) and 12,797 individuals with no or minor conflicts (referred to as controls). We assessed mental well-being as the outcome using the World Health Organization Five (WHO-5) well-being index, which ranges from 0 to 100. This index evaluates the respondent's emotional state over the preceding two weeks. The number of covariates is 70.
+-   Data: MIMIC-IV (Version 3.0) Download:
+    <https://physionet.org/content/mimiciv/3.0/>
 
-## Instructions
-1. generate data using "*Simulation.R", you will get data and ck_h csv files. The ck_h contains the local points and adaptive bandwidth by default, one can specify or define there own local intervals. Note all R functions are included in the "Method.R" file.
-2. implement different methods to the data to estimate the propensity scores. Logistic regression and CBPS methods can be applied by "Logistic and CBPS Model.R", which will output a R object saved to the local computer for further use. The BCE loss and PSLB-DL method are run on the sever using the "\*.py" files through the bash file generated from "lsf_generation*.py".
-3. evaluate the global balance, local balance, and outcome estimation (mean outcome or average treatment effect) with "Figures and Tables.R". This code can output figures and tables presented in the article. 
+## Data (Coded as MIMIC-EPR)
 
-## Step-by-step Example (Kang and Schafer (2007).zip -> 5k (5000 sample size))
-To facilitate the review process and ensure the reproducibility of our results, please follow the detailed instructions below, organized into distinct steps for clarity and ease of execution. These steps are designed to guide you through the simulation, analysis, and evaluation phases of our study using the provided scripts and data files.
+The case study design is thoroughly detailed in the paper. The
+`data_prepocess.R` file provides the data cleaning process and a
+descriptive analysis of the dataset, with the required datasets from the
+MIMIC-IV database listed in `datasets.txt`. The cleaned dataset is saved
+as `MIMIC_EPR.csv`. This study investigates the causal relationship
+between EPR changes and sepsis outcomes among ICU patients. The final
+sample consists of 5,564 individuals, with 2,656 in the high EPR change
+group and 2,908 in the low EPR change group. The primary outcome is
+28-day survival, while the secondary outcomes include in-hospital length
+of stay and in-hospital mortality. The dataset includes 20 baseline
+covariates, covering demographic information, laboratory results, risk
+scores, medication use, and treatments.
 
-1. Data Simulation
-- Script: `Kang_Schafer_Simulation.R`
-- Seed File: `sim_seed.csv`
-- Output: 100 simulated datasets and corresponding `ck_h.csv` files.
-- Parameters: Default span $\rho=0.1$ is used to determine the locality and compute the adaptive bandwidth.
-- Execution Environment: High-Performance Computing (HPC) cluster.
-- Command: After loading the R module (`module load R`), execute the simulation script using `Rscript Kang_Schafer_Simulation.R`.
-- Purpose: This step generates simulated data essential for the subsequent analysis.
+## Instructions (`LBC-Net (Illustration Code)`)
 
-2. Bash Files Generation and Execution
-Generate bash files for different analytical methods using the following Python scripts:
-- Logistic and CBPS Method: `parallel_logistic_cbps_lsf_generation.py`
-  - Requirements: 40 cores for parallel processes and total 200 GB memory.
-- LBC-Net Method: `PSLB_lsf_generation.py`
-  - Requirements: At least 2GB memory, 100 CPUs with 1 core, and 2 hours of wall-time; CPUs suffice for execution, although GPU nodes can be utilized if available (available gpu resources in our study is `cuda10.0/toolkit/10.0.130`).
-- BCE Method: `BCE_lsf_generation.py`
-  - Requirements: Similar to LBC-Net method. 
-- Learning Rate Optimization: `Learning_rate_lsf_generation.py`
-  - Purpose: Conduct a grid search for the learning rate for both BCE and LBC-Net methods. Evaluate tuning parameters by plotting a scatter plot of loss $Q(\theta)$ to observe convergence behavior.
+1.  Training Details and Hyperparameter Input The `lbc_net.py` script
+    contains the core code for estimation, utilizing functions defined
+    in `functions_lbc_net.py`. Parameter inputs are specified in the
+    bash shell script `lsf_script_lbc_net.py`. Below, the details of the
+    training process in `lbc_net.py` are explained:
 
-Follow the embedded instructions within each script to run the corresponding programs on the cluster, either in Python or R. After execution, download all resulting CSV files to your local machine for analysis.
-
-3. Analysis and Evaluation
-- Script for Figures and Tables: `Figures and Tables.R`
-  - This script utilizes functions defined in `Methods.R` to reproduce all figures and tables presented in the article.
-- Purpose: To evaluate the results and verify the reproducibility of our findings.
-
-### Additional Steps for Sensitivity Analysis
-To assess the robustness of our findings, we conducted a sensitivity analysis focusing on different network structures (ranging from 3 to 6 layers). This analysis is detailed in the `Sensitivity Analysis (Network Layers)` file, and the steps for execution are similar to those outlined above.
-
-### Training Details and Hyperparameter Selection (LBC-Net)
 Data Preparation:
-- Data Loading: Data and bandwidths were loaded using a specific seed to ensure reproducibility. 
-- Normalization and Data Processing: A custom dataloader was employed to normalize the data and add an intercept term, preparing the data for model training.
+
+-   Data Loading: The dataset and adaptive bandwidths (`ck_h.csv`) are
+    loaded using a specific random seed to ensure reproducibility. The
+    `ck_h.csv` file is generated with a span of 0.15.
+
+-   Normalization: Covariates are normalized, and an intercept term is
+    added to prepare the data for model training.
+
+-   Covariate and Treatment Indicator: Ensure that the indices of the
+    covariates and the treatment indicator are correctly specified in
+    the script.
 
 Model Configuration:
-- Initial Parameters:
-  - Batch Size: Determined based on dataset size (batch gradient descent). (For BCE method, we choose common 32 batch size.)
-  - Input Dimensions: Set according to the number of covariates in the dataset.
-  - Hidden Dimensions: Chosen from experience, balancing between the number of covariates and the total sample size to optimize model complexity and prevent overfitting.
-  - Output Dimensions: Configured to match the requirements of the propensity score estimation.
-  - Learning Rate: Initially selected through preliminary experiments, then fine-tuned using a grid search approach to identify the optimal value that minimizes the loss function.
-  - Total Epochs: Set to ensure sufficient model training ($20000$) (For BCE method, we uses 150 epoch as it is adequate for convergence).
+
+-   Initial Parameters:
+
+    -   Input Dimensions: Set as the number of covariates in the dataset
+        plus one (for the intercept).
+
+    -   Hidden Dimensions: Determined based on experience, balancing the
+        number of covariates and the total sample size to optimize model
+        complexity while avoiding overfitting. The default is set to
+        100, but for simpler models (e.g., Kang and Schafer
+        simulations), it is set to 10.
+
+    -   Output Dimensions: Configured to align with the sample size for
+        propensity score estimation.
+
+    -   Learning Rate: Default value is 0.05, providing a balance
+        between training efficiency and performance. Sensitivity
+        analysis indicates minimal differences in model performance (in
+        terms of covariate balance and loss function) for learning rates
+        between 0.001 and 0.1.
+
+    -   Max Epochs: Set to 20,000 for sufficient training. For BCE
+        methods, 250 epochs are used as this is generally adequate for
+        convergence. Larger values of learning rates and epochs risk
+        overfitting, producing extreme results (e.g., 0 or 1 scores).
+
+    -   LSD threshold: This parameter enables early stopping to improve
+        efficiency. Training stops when the rolling average of the LSD
+        values drops below this threshold, as numerical studies show
+        diminishing improvements after a certain number of epochs. The
+        default is set to 2.
+
+    -   Blalance Lambda: This term regulates the trade-off between the
+        balancing term and the calibration term in LBC-Net. It is set to
+        1 for the entire study. - GPU: The script is designed to
+        automatically detect whether a GPU is available for computation.
+        CPU is enough for most study purpose.
 
 Model Architecture:
-- Network Structure: The model is a three-layer fully connected feed-forward neural network, incorporating batch normalization and residual connections to enhance learning dynamics and stability.
-- VAE for Initial Weights: A Variational Autoencoder (VAE) model was implemented to generate initial weights for the propensity score model, facilitating a more effective learning start point.
-- Customized Loss Functions:
-  - local_balance_ipw_loss: $Q1$ in the article.
-  - penalty_loss (referred to as calibration loss in the article): $Q2$ in the article.
 
-Please ensure that each step is followed carefully to guarantee the accurate reproduction of our study’s results. Your attention to detail and adherence to these instructions are greatly appreciated and essential for a thorough review process.
+-   Network Structure: The default model is a three-layer fully
+    connected feed-forward neural network, incorporating batch
+    normalization to improve learning dynamics and stability. The number
+    of hidden layers can be adjusted using the `L` parameter in the
+    model. However, a three-layer structure is generally sufficient for
+    most propensity score estimation tasks.
 
-## Real Data Analysis
-Computational Resources and Configuration:
-- Wall-Time: Given the complexity and size of the real dataset, we allocated 6 hours of wall-time for all methods.
-- Memory Allocation: 6GB of memory is reserved for CPU nodes
-- GPU Utilization for LBC-Net Method: a GPU node equipped with 16 cores (`cuda10.0/toolkit/10.0.130`). 
+-   VAE for Initial Weights: A Variational Autoencoder (VAE) is used to
+    initialize the weights of the propensity score model, providing a
+    more effective starting point for the learning process.
 
-The processing steps for the real data analysis mirror those described in the simulation study section. This consistency ensures that the methodologies are applied systematically across different datasets, allowing for direct comparisons of performance and outcomes. Additionally, `Bootstrap (standard deviation)` file contains scripts implementing 100 bootstrap simulations to assess the stability (bootstrap standard deviation) of all methods when applied to real-world data. Each simulation replicates the data analysis process, applying our methods to resampled datasets. 
+-   Customized Loss Functions:
+
+    -   local_balance_ipw_loss: Corresponds to $Q1$ in the article,
+        focusing on achieving local covariate balance.
+
+    -   penalty_loss (referred to as calibration loss in the article):
+        Corresponds to $Q2$ in the article, ensuring the calibration of
+        the propensity score model.
+
+2.  Bash Files Generation and Execution For server-based estimation
+    workflows (e.g., those run on a cluster), bash files with input
+    parameters can be generated to streamline the process. If the server
+    is not available, the main script `lbc_net.py` can be executed
+    directly on a local machine. The expected runtime for this
+    illustrative example is less than 5 minutes, ensuring efficiency
+    during testing or demonstration. Upon completion, the script outputs
+    the propensity scores in the ps_lbc_net.csv file.
+
+3.  Analysis and Evaluation Use the illustrative R script
+    `results (illustration).R` to evaluate the performance of the
+    estimated propensity scores. This includes calculating the Average
+    Treatment Effect (ATE), assessing global balance using the Global
+    Standardized Difference (GSD), examining local balance with the
+    Local Standardized Difference (LSD), and visualizing the results
+    through a mirror histogram and a Hosmer-Lemeshow plot.
+    
+Follow the embedded instructions provided within each script to execute the corresponding programs on either a cluster or a local machine. Depending on the script, the programs can be run in Python or R, as specified. Ensure that the necessary dependencies and environment configurations are in place before execution.
+
+## Instructions (`Data Application`)
+
+-   Methods
+
+This section contains all methods used for comparison in the case study.
+The implementations for NN and CBIPM are provided as Python scripts with
+corresponding bash files for execution, while the remaining methods
+(CBPS, logistic regression, EB, SBW, and OSQP) are implemented in R.
+These methods output propensity scores and weights as `.csv` files for
+further analysis.
+
+-   Results
+
+This section includes all results generated from the methods. The `.rds`
+file contains additional results for the time-varying hazard ratio study
+and variance estimation. A script named `results.R` provides all the
+code needed to generate analysis results, tables, and figures presented
+in the paper. Ensure all required packages are installed before running
+the script.
+
+-   Time-varying Effect
+
+This file visualizes the time-varying effects of the Cox model for both
+the unweighted model and the weighted model using LBC-Net. The variance
+of the coefficients for constructing confidence intervals is estimated
+using a bootstrap approach. The results from LBC-Net can leverage the
+same outputs generated during the variance estimation process detailed
+in the next section.
+
+-   Variance Estimation
+
+To estimate the variance for each method, 500 bootstrap samples are
+generated using the `bootstrap.R` script. Initially, all methods produce
+their respective estimated propensity scores or weights. Subsequently,
+the `res_ve.R` script calculates the variance for each method based on
+the bootstrap samples.
+
+## Instructions (`KS 5k`)
+
+- Data Generation
+
+The `Kang_Schafer_Simulation.R` script generates 500 simulation samples with a specified sample size of n=5000. The data generation process can be configured as correctly specified (model=true) or misspecified (model=mis). The span is set to 0.15 by default, but this value can be adjusted as needed. The script outputs the simulated data and ck_h csv files, as well as the true propensity scores saved in a matrix format (`ps_true_matrix.rds`). The `ck_h.csv` file contains the local points and adaptive bandwidths by default, but users can specify or define their own local intervals if required.
+
+Update: Due to the .rds files exceeding GitHub's file size limit, only the illustration files have been uploaded. The complete .rds files can be shared through alternative means if required.
+
+- Estimation
+
+Similar to the previous sections, the estimated propensity scores and weights are stored in `.csv` files. The `res_sim.R` script processes these raw estimations to generate results, including percent bias, RMSE, and covariate balance, which are saved in the `ks5k*.rds` file. All .rds files, including this one, can be found in the `results (.rds)` file. Afterward, the `res_summary.R` script can be used to replicate the figures and tables presented in the paper.
+
+- Sensitivity Analysis
+
+To evaluate the robustness of our findings, we performed a sensitivity analysis examining different network structures and model specifications. Three files are included: `layer`, `lr`, and `rho`, representing the tuning parameters for the number of hidden layers, learning rate, and span, respectively. The results for these tuning parameters can be obtained similarly through the `Estimation` process described above. For `rho`, the script generates files with varying numbers of spans, saved as `ck_h_{seed}_{rho}.csv`, where each file corresponds to a specific value of `rho`. 
+
+- Ablation Study
+
+Similarly, process the scripts individually for the following variations: balance loss only (`lbc_net_bal_only.py`), without VAE initialization (`lbc_net_no_vae.py`), and BCE loss only (`lbc_net_bce.py`). After running these scripts, use `res_sim.R` to process the raw estimation results and then `res_summary.R` to generate the final results, including figures and tables.
+
+Please ensure that each step is followed carefully to guarantee the
+accurate reproduction of our study's results. Your attention to detail
+and adherence to these instructions are greatly appreciated and
+essential for a thorough review process.
 
 ## LICENSE
-This project is licensed under the MIT License - see the LICENSE.txt file for details.
+
+This project is licensed under the MIT License - see the LICENSE.txt
+file for details.
 
 ## Reference
-Kang, J. D. and Schafer, J. L. Demystifying double robustness: A comparison of alternative strategies for estimating a population mean from incomplete data. Statistical Science, 22(4):523–539, 2007
 
+Kang, J. D. and Schafer, J. L. Demystifying double robustness: A
+comparison of alternative strategies for estimating a population mean
+from incomplete data. Statistical Science, 22(4):523--539, 2007
 
-
-
-
-
-
-
-  
+Li, Y. and Li, L. (2021). Propensity score analysis methods with
+balancing constraints: a monte carlo study. Statistical Methods in
+Medical Research, 30(4):1119--1142.
