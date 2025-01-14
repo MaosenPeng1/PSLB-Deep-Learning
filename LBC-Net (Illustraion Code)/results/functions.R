@@ -208,31 +208,38 @@ mirror_plot <- function(ps, Z){
     geom_hline(yintercept = 0) +
     labs(x = "Propensity Score",
          y = "Frequency") +
-    theme(panel.background = element_blank(),
-          axis.line = element_line(colour = "black")) +
+    theme(
+      panel.background = element_blank(),
+      axis.line = element_line(colour = "black"),
+      axis.title = element_text(size = 20),      # Axis title font size
+      axis.text = element_text(size = 20),       # Axis text font size
+      plot.title = element_text(size = 20),      # Title font size
+      legend.text = element_text(size = 20),     # Legend text font size
+      legend.title = element_text(size = 20)     # Legend title font size
+    ) +
     scale_y_continuous(breaks = c(-50, 0, 50, 100, 150, 200),
                        label = c(50, 0, 50, 100, 150, 200)) +
     annotate("text", 
              label = "Z=0",
              x = 0.93,
              y = 100,
-             size = unit(3, "pt")) +
+             size = unit(6, "pt")) +
     annotate("text", 
              label = "Z=1",
              x = 0.93,
              y = -60,
-             size = unit(3, "pt"))
+             size = unit(6, "pt"))
   
   return(plot)
   
 }
 
 LSD_balance_plot <- function(ds){
-  ## Purpose: Local balance plot
+  ## Purpose: Figure 3
   ## Input: 
-  ##    ds -- Data
+  ##    ds -- Balance Results
   ## Output:
-  ##    Local balance plot
+  ##    Figure 3
   
   # Calculate column means
   f1_colmean <- function(mat){
@@ -254,14 +261,14 @@ LSD_balance_plot <- function(ds){
   ds_new$CK <- numeric_labels
   
   # Define line types, shapes, and colors for each method
-  line_types <- c("LOGISTIC" = "dotdash", "CBPS" = "dashed", "NN" = "dotted", "LBC-NET" = "solid")
-  point_shapes <- c("LOGISTIC" = 15, "CBPS" = 17, "NN" = 16, "LBC-NET" = 1)
+  # line_types <- c("LOGISTIC" = "dotdash", "CBPS" = "dashed", "NN" = "dotted", "LBC-NET" = "solid")
+  # point_shapes <- c("LOGISTIC" = 15, "CBPS" = 17, "NN" = 16, "LBC-NET" = 1)
   custom_colors <- c("LOGISTIC" = "#d62728", "CBPS" = "#2ca02c", "NN" = "#1f77b4", "LBC-NET" = "#9467bd")
   
   # Plot with both points and boxplots having the same shape for consistency
-  pt <- ggplot(ds_new, aes(x = CK, y = Mean, linetype = Method, shape = Method, color = Method)) +
-    geom_line(size = 1.2) +  # Increased line width
-    geom_point(size = 0.8) +  # Smaller point size for the line plot
+  pt <- ggplot(ds_new, aes(x = CK, y = Mean, color = Method)) +
+    geom_line(size = 1) +  # Increased line width
+    geom_point(size = 0.9) +  # Smaller point size for the line plot
     scale_x_discrete(breaks = c(0.01, 0.11, 0.21, 0.31, 0.41, 0.51, 0.61, 0.71, 0.81, 0.91, 0.99), labels = c(0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99)) +
     theme_bw(base_size = 20) + 
     theme(legend.position = "bottom",
@@ -272,8 +279,8 @@ LSD_balance_plot <- function(ds){
           legend.text = element_text(size = 20),
           legend.title = element_text(size = 20)) +
     labs(x = "Propensity Score", y = "LSD(%)") +
-    scale_linetype_manual(values = line_types) +
-    scale_shape_manual(values = point_shapes) +
+    # scale_linetype_manual(values = line_types) +
+    # scale_shape_manual(values = point_shapes) +
     scale_color_manual(values = custom_colors) +
     guides(
       shape = guide_legend(override.aes = list(size = 1.7))  # Custom size for the legend points
@@ -283,10 +290,10 @@ LSD_balance_plot <- function(ds){
   for (i in unique(ds_new$Method)){
     ds_sub <- subset(vdata, Method == i)
     pt <- pt + geom_boxplot(data = ds_sub, 
-                            aes(x = CK, y = LSD, shape = Method, color = Method), outlier.shape = NA, 
+                            aes(x = CK, y = LSD, color = Method), outlier.shape = 4, outlier.size = 1, 
                             width = 0.5, 
                             position = position_dodge(width = 0.5)) +
-      geom_point(data = ds_sub, aes(x = CK, y = LSD, shape = Method), size = 0, position = position_dodge(width = 0.5)) +
+      geom_point(data = ds_sub, aes(x = CK, y = LSD), size = 0, position = position_dodge(width = 0.5)) +
       stat_boxplot(data = ds_sub,
                    aes(x = CK, y = LSD, color = Method, group = interaction(CK, Method)),
                    geom = "errorbar",
