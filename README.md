@@ -254,6 +254,7 @@ To evaluate the robustness of our findings, we performed a sensitivity analysis 
 Similarly, process the scripts individually for the following variations: balance loss only (`lbc_net_bal_only.py`), without VAE initialization (`lbc_net_no_vae.py`), and BCE loss only (`lbc_net_bce.py`). After running these scripts, use `res_sim.R` to process the raw estimation results and then `res_summary (*).R` to generate the final results, including figures and tables.
 
 - Moments
+
 Use estimated propensity scores to produce results for second moment balance. 
 
 Please ensure that each step is followed carefully to guarantee the
