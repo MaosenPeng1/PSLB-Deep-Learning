@@ -47,10 +47,7 @@ specific to that file.
 There is a `function.R` in each file, which are used for all R code
 specific to this file. In each sub-study, in addition to LBC-Net, the
 code also compares performance with model-based methods (Logistic
-Regression, CBPS, NN) and weight-based methods (SBW, CBIPM, EB, OSQP).
-It is worth noting that ATT weight-based methods, such as EB and OSQP,
-are not included in all simulations. Further details on these methods
-can be found in the supplementary materials.
+Regression, CBPS, NN) and weight-based methods (SBW, CBIPM).
 
 The following sections provide step-by-step guidance for implementing
 the `LBC-Net (Illustration Code)`, along with comprehensive instructions
@@ -199,7 +196,7 @@ Follow the embedded instructions provided within each script to execute the corr
 This section contains all methods used for comparison in the case study.
 The implementations for NN and CBIPM are provided as Python scripts with
 corresponding bash files for execution, while the remaining methods
-(CBPS, logistic regression, EB, SBW, and OSQP) are implemented in R.
+(CBPS, logistic regression, and SBW) are implemented in R.
 These methods output propensity scores and weights as `.csv` files for
 further analysis.
 
@@ -207,10 +204,15 @@ further analysis.
 
 This section includes all results generated from the methods. The `.rds`
 file contains additional results for the time-varying hazard ratio study
-and variance estimation. A script named `results.R` provides all the
+and variance estimation. A script named `results (*).R` provides all the
 code needed to generate analysis results, tables, and figures presented
 in the paper. Ensure all required packages are installed before running
 the script.
+
+Note: The asterisk * in `results (*).R` represents the corresponding table 
+or figure number in the manuscript or supplementary materials. "T" denotes 
+a table, while "S" denotes a figure. For example, "TS1" refers to Table S1, 
+and "FS1" refers to Figure S1.
 
 -   Time-varying Effect
 
@@ -239,7 +241,9 @@ Update: Due to the .rds files exceeding GitHub's file size limit, only the illus
 
 - Estimation
 
-Similar to the previous sections, the estimated propensity scores and weights are stored in `.csv` files. The `res_sim.R` script processes these raw estimations to generate results, including percent bias, RMSE, and covariate balance, which are saved in the `ks5k*.rds` file. All .rds files, including this one, can be found in the `results (.rds)` file. Afterward, the `res_summary.R` script can be used to replicate the figures and tables presented in the paper.
+Similar to the previous sections, the estimated propensity scores and weights are stored in `.csv` files. The `res_sim.R` script processes these raw estimations to generate results, including percent bias, RMSE, and covariate balance, which are saved in the `ks5k*.rds` file. All .rds files, including this one, can be found in the `results (.rds)` file. Afterward, the `res_summary (*).R` script can be used to replicate the figures and tables presented in the paper.
+
+Note: The asterisk * in `res_summary (*).R` represents the corresponding table or figure number in the manuscript or supplementary materials. "T" denotes a table, while "S" denotes a figure. For example, "TS1" refers to Table S1, and "FS1" refers to Figure S1.
 
 - Sensitivity Analysis
 
@@ -247,7 +251,10 @@ To evaluate the robustness of our findings, we performed a sensitivity analysis 
 
 - Ablation Study
 
-Similarly, process the scripts individually for the following variations: balance loss only (`lbc_net_bal_only.py`), without VAE initialization (`lbc_net_no_vae.py`), and BCE loss only (`lbc_net_bce.py`). After running these scripts, use `res_sim.R` to process the raw estimation results and then `res_summary.R` to generate the final results, including figures and tables.
+Similarly, process the scripts individually for the following variations: balance loss only (`lbc_net_bal_only.py`), without VAE initialization (`lbc_net_no_vae.py`), and BCE loss only (`lbc_net_bce.py`). After running these scripts, use `res_sim.R` to process the raw estimation results and then `res_summary (*).R` to generate the final results, including figures and tables.
+
+- Moments
+Use estimated propensity scores to produce results for second moment balance. 
 
 Please ensure that each step is followed carefully to guarantee the
 accurate reproduction of our study's results. Your attention to detail
